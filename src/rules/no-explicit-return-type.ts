@@ -19,7 +19,8 @@ export const noExplicitReturnType = createRule({
   create(context) {
     return {
       FunctionDeclaration(node) {
-        if (node.returnType) {
+        // Skip overload signatures (no body) — return types are required there
+        if (node.returnType && node.body) {
           context.report({
             node: node.returnType,
             messageId: 'noReturnType',

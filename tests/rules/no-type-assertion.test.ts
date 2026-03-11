@@ -31,5 +31,11 @@ ruleTester.run('no-type-assertion', noTypeAssertion, {
       code: 'const y = foo as unknown as Bar',
       errors: [{ messageId: 'noAs' }, { messageId: 'noAs' }],
     },
+    // Angle-bracket syntax
+    {
+      code: 'const x = <string>value',
+      languageOptions: { parserOptions: { ecmaFeatures: { jsx: false } } },
+      errors: [{ messageId: 'noAngleBracket' }],
+    },
   ],
 })

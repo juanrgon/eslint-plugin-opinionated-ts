@@ -13,6 +13,8 @@ ruleTester.run('no-explicit-return-type', noExplicitReturnType, {
     'function add(args: { a: number; b: number }) { return args.a + args.b }',
     'const greet = (args: { name: string }) => `Hello ${args.name}`',
     'export function doStuff() { return 42 }',
+    // Overload signatures (no body) should be allowed
+    'function generate(args: { id: string }): string;',
   ],
   invalid: [
     {

@@ -21,6 +21,10 @@ ruleTester.run('strict-args', strictArgs, {
 
     // No type annotation (we don't enforce types, just validate shape if present)
     'function foo(args) { return args }',
+
+    // `this` parameter should be ignored
+    'function foo(this: Context, args: { id: string }) { return args.id }',
+    'function foo(this: Window) { return this }',
   ],
   invalid: [
     // Multiple params
@@ -52,6 +56,21 @@ ruleTester.run('strict-args', strictArgs, {
     {
       code: 'const foo = ({ id }: { id: string }) => id',
       errors: [{ messageId: 'noDestructure' }],
+    },
+    // Array destructuring
+    {
+      code: 'function foo([a, b]: [string, number]) { return a }',
+      errors: [{ messageId: 'noDestructure' }],
+    },
+    // Rest element
+    {
+      code: 'function foo(...args: string[]) { return args }',
+      errors: [{ messageId: 'singleArg' }],
+    },
+    // `this` param + multiple real params should still error
+    {
+      code: 'function foo(this: Context, a: string, b: number) { return a }',
+      errors: [{ messageId: 'singleArg' }],
     },
   ],
 })

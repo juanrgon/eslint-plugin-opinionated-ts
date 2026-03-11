@@ -25,7 +25,13 @@ export const strictArgs = createRule({
     },
   },
   create(context) {
-    function check(params: TSESTree.Parameter[]) {
+    function check(rawParams: TSESTree.Parameter[]) {
+      // Filter out TypeScript `this` parameter
+      const params = rawParams.filter(
+        (p) =>
+          !(p.type === AST_NODE_TYPES.Identifier && p.name === 'this'),
+      )
+
       if (params.length === 0) return
       if (params.length > 1) {
         context.report({ node: params[1]!, messageId: 'singleArg' })
@@ -39,7 +45,18 @@ export const strictArgs = createRule({
         return
       }
 
+      if (param.type === AST_NODE_TYPES.ArrayPattern) {
+        context.report({ node: param, messageId: 'noDestructure' })
+        return
+      }
+
+      if (param.type === AST_NODE_TYPES.RestElement) {
+        context.report({ node: param, messageId: 'singleArg' })
+        return
+      }
+
       if (param.type !== AST_NODE_TYPES.Identifier) {
+        context.report({ node: param, messageId: 'singleArg' })
         return
       }
 

@@ -17,7 +17,7 @@ const plugin = {
     'no-type-assertion': noTypeAssertion,
     'prefer-type-over-interface': preferTypeOverInterface,
   },
-} as const
+}
 
 const recommended = {
   plugins: {
@@ -32,10 +32,10 @@ const recommended = {
     'opinionated-ts/prefer-type-over-interface': 'error',
     'unicorn/filename-case': ['error', { case: 'kebabCase' }],
   },
-} as const
+}
 
 const configs = {
   recommended,
-} as const
+}
 
 export default { ...plugin, configs }

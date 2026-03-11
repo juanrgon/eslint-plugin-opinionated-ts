@@ -12,6 +12,10 @@ Install directly from GitHub:
 npm install --save-dev github:juanrgon/eslint-plugin-opinionated-ts
 ```
 
+## Prerequisites
+
+Requires `@typescript-eslint/parser` to be configured, since the rules operate on TypeScript AST nodes. If you're using `typescript-eslint`, you likely already have this.
+
 ## Usage
 
 Add the recommended config to your `eslint.config.js`:
@@ -50,6 +54,6 @@ export default [
 | `strict-args` | Functions take a single `args` parameter with an inline object type. No multiple params, no destructuring, no optional properties, no type references. |
 | `no-explicit-return-type` | No return type annotations. Let TypeScript infer them. Has autofix. |
 | `no-enum` | No enums. Use `as const` objects with derived types instead. |
-| `no-type-assertion` | No `as` type assertions. Use `satisfies` instead. `as const` is still allowed. |
+| `no-type-assertion` | No `as` or angle-bracket type assertions. Use `satisfies` instead. `as const` is still allowed. |
 | `prefer-type-over-interface` | No `interface` declarations. Use `type` aliases. |
 | `unicorn/filename-case` | All files must use kebab-case. Provided via `eslint-plugin-unicorn` in the recommended config. |
