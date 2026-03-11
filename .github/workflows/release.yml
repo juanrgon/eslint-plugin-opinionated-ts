@@ -1,0 +1,43 @@
+name: Build and publish to release branch
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm test
+
+      - run: npm run build
+
+      - name: Push built output to release branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Remove dist/ from .gitignore so it gets committed
+          sed -i '/^dist\/$/d' .gitignore
+
+          # Remove devDependencies and scripts consumers don't need
+          node -e "
+            const pkg = require('./package.json');
+            delete pkg.devDependencies;
+            delete pkg.scripts;
+            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+          git add -A
+          git commit -m "Release $(git rev-parse --short HEAD)"
+          git push --force origin HEAD:release
