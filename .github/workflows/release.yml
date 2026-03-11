@@ -31,11 +31,12 @@ jobs:
           sed -i '/^dist\/$/d' .gitignore
 
           # Remove devDependencies and scripts consumers don't need
-          node -e "
-            const pkg = require('./package.json');
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
             delete pkg.devDependencies;
             delete pkg.scripts;
-            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
 
           git add -A

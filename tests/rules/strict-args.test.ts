@@ -25,6 +25,12 @@ ruleTester.run('strict-args', strictArgs, {
     // `this` parameter should be ignored
     'function foo(this: Context, args: { id: string }) { return args.id }',
     'function foo(this: Window) { return this }',
+
+    // Callbacks passed as arguments are skipped
+    '[1, 2, 3].map((val) => val + 1)',
+    '[1, 2, 3].filter((val, index) => index > 0)',
+    'items.forEach((item) => console.log(item))',
+    'promise.then((result) => result.data)',
   ],
   invalid: [
     // Multiple params

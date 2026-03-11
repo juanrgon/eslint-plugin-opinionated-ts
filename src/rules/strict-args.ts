@@ -86,14 +86,20 @@ export const strictArgs = createRule({
       }
     }
 
+    function isCallbackArgument(node: TSESTree.Node) {
+      return node.parent?.type === AST_NODE_TYPES.CallExpression
+    }
+
     return {
       FunctionDeclaration(node) {
         check(node.params)
       },
       ArrowFunctionExpression(node) {
+        if (isCallbackArgument(node)) return
         check(node.params)
       },
       FunctionExpression(node) {
+        if (isCallbackArgument(node)) return
         check(node.params)
       },
     }
