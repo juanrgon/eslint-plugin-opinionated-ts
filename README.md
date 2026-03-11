@@ -6,8 +6,10 @@ This is not a style guide for teams or the community. It's my own set of guardra
 
 ## Install
 
+Install directly from GitHub:
+
 ```sh
-npm install --save-dev eslint-plugin-opinionated-ts
+npm install --save-dev github:juanrgon/eslint-plugin-opinionated-ts
 ```
 
 ## Usage
