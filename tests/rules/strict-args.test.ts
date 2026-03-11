@@ -31,6 +31,13 @@ ruleTester.run('strict-args', strictArgs, {
     '[1, 2, 3].filter((val, index) => index > 0)',
     'items.forEach((item) => console.log(item))',
     'promise.then((result) => result.data)',
+
+    // Object property values are skipped (framework callbacks)
+    'const obj = { onMutate(input) { return input } }',
+    'const obj = { onChange: (e) => e.target.value }',
+
+    // JSX expression containers are skipped
+    { code: 'const x = <input onChange={(e) => e.target.value} />', languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } } },
   ],
   invalid: [
     // Multiple params

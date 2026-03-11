@@ -86,8 +86,20 @@ export const strictArgs = createRule({
       }
     }
 
-    function isCallbackArgument(node: TSESTree.Node) {
-      return node.parent?.type === AST_NODE_TYPES.CallExpression
+    function isFrameworkCallback(node: TSESTree.Node) {
+      const parent = node.parent
+      if (!parent) return false
+
+      // Direct call argument: .map(x => x), .then(x => x)
+      if (parent.type === AST_NODE_TYPES.CallExpression) return true
+
+      // Object property value: { onMutate(input) {...} }
+      if (parent.type === AST_NODE_TYPES.Property) return true
+
+      // JSX expression: onChange={(e) => ...}
+      if (parent.type === AST_NODE_TYPES.JSXExpressionContainer) return true
+
+      return false
     }
 
     return {
@@ -95,11 +107,11 @@ export const strictArgs = createRule({
         check(node.params)
       },
       ArrowFunctionExpression(node) {
-        if (isCallbackArgument(node)) return
+        if (isFrameworkCallback(node)) return
         check(node.params)
       },
       FunctionExpression(node) {
-        if (isCallbackArgument(node)) return
+        if (isFrameworkCallback(node)) return
         check(node.params)
       },
     }
