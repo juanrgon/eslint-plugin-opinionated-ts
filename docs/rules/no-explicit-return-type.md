@@ -31,3 +31,24 @@ export function add(args: { a: number; b: number }): number {
   ```
 
 - **Overload signatures** (declarations without a body) — return types are required there.
+
+- **Directly recursive functions** — TypeScript cannot infer a function's return type from itself (TS7023). Heuristic: a named function whose body mentions its own name keeps its annotation. Mutually recursive functions aren't detected — annotate one function in the cycle and add a disable comment.
+
+  ```typescript
+  // ✅ allowed
+  function walk(args: { value: unknown }): string {
+    if (Array.isArray(args.value)) return args.value.map((v) => walk({ value: v })).join(", ")
+    return String(args.value)
+  }
+  ```
+
+### A widening gotcha
+
+A function returning bare string literals infers a *widening* type — `cond ? "a" : "b"` infers `string` in object positions, not `"a" | "b"`. Where the literal union matters, return `as const` literals instead of re-adding the annotation:
+
+```typescript
+// ✅ infers "local" | "apiKey"
+function mode(args: { value: unknown }) {
+  return args.value === "local" ? ("local" as const) : ("apiKey" as const)
+}
+```

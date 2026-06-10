@@ -21,6 +21,9 @@ ruleTester.run('no-explicit-return-type', noExplicitReturnType, {
     'function assertDefined(value: unknown): asserts value is NonNullable<unknown> { if (value == null) throw new Error() }',
     'const ids = values.filter((id): id is number => id != null)',
     'const obj = { isFoo(value: unknown): value is string { return typeof value === "string" } }',
+    // Directly recursive functions cannot infer their own return type (TS7023)
+    'function walk(args: { value: unknown }): string { return Array.isArray(args.value) ? args.value.map((v) => walk({ value: v })).join() : "" }',
+    'const walk = (args: { value: unknown }): string => Array.isArray(args.value) ? args.value.map((v) => walk({ value: v })).join() : ""',
   ],
   invalid: [
     {
@@ -36,6 +39,12 @@ ruleTester.run('no-explicit-return-type', noExplicitReturnType, {
     {
       code: 'const handler = { run(): void {} }',
       output: 'const handler = { run() {} }',
+      errors: [{ messageId: 'noReturnType' }],
+    },
+    // Mentioning a *different* function is not recursion — still flagged
+    {
+      code: 'function outer(): string { return inner() }',
+      output: 'function outer() { return inner() }',
       errors: [{ messageId: 'noReturnType' }],
     },
   ],
