@@ -1,4 +1,10 @@
+import type { TSESTree } from '@typescript-eslint/utils'
+import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule.js'
+
+function isTypePredicate(args: { returnType: TSESTree.TSTypeAnnotation }) {
+  return args.returnType.typeAnnotation.type === AST_NODE_TYPES.TSTypePredicate
+}
 
 export const noExplicitReturnType = createRule({
   name: 'no-explicit-return-type',
@@ -17,40 +23,39 @@ export const noExplicitReturnType = createRule({
     fixable: 'code',
   },
   create(context) {
+    function check(args: {
+      node:
+        | TSESTree.FunctionDeclaration
+        | TSESTree.ArrowFunctionExpression
+        | TSESTree.FunctionExpression
+    }) {
+      const returnType = args.node.returnType
+      if (!returnType) return
+
+      // Type predicates (`x is Foo`, `asserts x is Foo`) cannot be inferred —
+      // removing them silently breaks narrowing, so they are always allowed.
+      if (isTypePredicate({ returnType })) return
+
+      context.report({
+        node: returnType,
+        messageId: 'noReturnType',
+        fix(fixer) {
+          return fixer.remove(returnType)
+        },
+      })
+    }
+
     return {
       FunctionDeclaration(node) {
         // Skip overload signatures (no body) — return types are required there
-        if (node.returnType && node.body) {
-          context.report({
-            node: node.returnType,
-            messageId: 'noReturnType',
-            fix(fixer) {
-              return fixer.remove(node.returnType!)
-            },
-          })
-        }
+        if (!node.body) return
+        check({ node })
       },
       ArrowFunctionExpression(node) {
-        if (node.returnType) {
-          context.report({
-            node: node.returnType,
-            messageId: 'noReturnType',
-            fix(fixer) {
-              return fixer.remove(node.returnType!)
-            },
-          })
-        }
+        check({ node })
       },
       FunctionExpression(node) {
-        if (node.returnType) {
-          context.report({
-            node: node.returnType,
-            messageId: 'noReturnType',
-            fix(fixer) {
-              return fixer.remove(node.returnType!)
-            },
-          })
-        }
+        check({ node })
       },
     }
   },

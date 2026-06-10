@@ -1,10 +1,25 @@
 {
   "name": "eslint-plugin-opinionated-ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Personal ESLint rules for opinionated TypeScript: single args parameter, inferred return types, no enums, satisfies over as, type over interface",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juanrgon/eslint-plugin-opinionated-ts.git"
+  },
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "typescript"
+  ],
   "type": "module",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -12,6 +27,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "lint": "npm run build && eslint .",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -19,6 +35,7 @@
     "eslint": "^9.0.0"
   },
   "devDependencies": {
+    "@typescript-eslint/parser": "^8.0.0",
     "@typescript-eslint/rule-tester": "^8.0.0",
     "eslint": "^9.0.0",
     "tsup": "^8.0.0",

@@ -1,11 +1,12 @@
+import type { TSESTree } from '@typescript-eslint/utils'
 import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule.js'
 
-function isConstAssertion(typeAnnotation: { type: string; typeName?: { type: string; name?: string } }) {
+function isConstAssertion(args: { typeAnnotation: TSESTree.TypeNode }) {
   return (
-    typeAnnotation.type === AST_NODE_TYPES.TSTypeReference &&
-    typeAnnotation.typeName?.type === AST_NODE_TYPES.Identifier &&
-    typeAnnotation.typeName.name === 'const'
+    args.typeAnnotation.type === AST_NODE_TYPES.TSTypeReference &&
+    args.typeAnnotation.typeName.type === AST_NODE_TYPES.Identifier &&
+    args.typeAnnotation.typeName.name === 'const'
   )
 }
 
@@ -28,11 +29,11 @@ export const noTypeAssertion = createRule({
   create(context) {
     return {
       TSAsExpression(node) {
-        if (isConstAssertion(node.typeAnnotation)) return
+        if (isConstAssertion({ typeAnnotation: node.typeAnnotation })) return
         context.report({ node, messageId: 'noAs' })
       },
       TSTypeAssertion(node) {
-        if (isConstAssertion(node.typeAnnotation)) return
+        if (isConstAssertion({ typeAnnotation: node.typeAnnotation })) return
         context.report({ node, messageId: 'noAngleBracket' })
       },
     }

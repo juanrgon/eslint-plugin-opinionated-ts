@@ -2,6 +2,33 @@ import type { TSESTree } from '@typescript-eslint/utils'
 import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 import { createRule } from '../create-rule.js'
 
+function isThisParameter(args: { param: TSESTree.Parameter }) {
+  return (
+    args.param.type === AST_NODE_TYPES.Identifier && args.param.name === 'this'
+  )
+}
+
+// Functions in callback position are exempt: their signatures are dictated by
+// the caller (array methods, promise chains, event handlers, ESLint visitors,
+// option objects). This intentionally includes every function used as an
+// object-literal property value — handler maps and returned visitor objects
+// make a tighter check too noisy.
+function isCallbackPosition(args: { node: TSESTree.Node }) {
+  const parent = args.node.parent
+  if (!parent) return false
+
+  // Direct call argument: .map(x => x), .then(x => x)
+  if (parent.type === AST_NODE_TYPES.CallExpression) return true
+
+  // Object property value: { onMutate(input) {...} }
+  if (parent.type === AST_NODE_TYPES.Property) return true
+
+  // JSX expression: onChange={(e) => ...}
+  if (parent.type === AST_NODE_TYPES.JSXExpressionContainer) return true
+
+  return false
+}
+
 export const strictArgs = createRule({
   name: 'strict-args',
   defaultOptions: [],
@@ -25,11 +52,9 @@ export const strictArgs = createRule({
     },
   },
   create(context) {
-    function check(rawParams: TSESTree.Parameter[]) {
-      // Filter out TypeScript `this` parameter
-      const params = rawParams.filter(
-        (p) =>
-          !(p.type === AST_NODE_TYPES.Identifier && p.name === 'this'),
+    function check(args: { params: TSESTree.Parameter[] }) {
+      const params = args.params.filter(
+        (param) => !isThisParameter({ param }),
       )
 
       if (params.length === 0) return
@@ -86,33 +111,17 @@ export const strictArgs = createRule({
       }
     }
 
-    function isFrameworkCallback(node: TSESTree.Node) {
-      const parent = node.parent
-      if (!parent) return false
-
-      // Direct call argument: .map(x => x), .then(x => x)
-      if (parent.type === AST_NODE_TYPES.CallExpression) return true
-
-      // Object property value: { onMutate(input) {...} }
-      if (parent.type === AST_NODE_TYPES.Property) return true
-
-      // JSX expression: onChange={(e) => ...}
-      if (parent.type === AST_NODE_TYPES.JSXExpressionContainer) return true
-
-      return false
-    }
-
     return {
       FunctionDeclaration(node) {
-        check(node.params)
+        check({ params: node.params })
       },
       ArrowFunctionExpression(node) {
-        if (isFrameworkCallback(node)) return
-        check(node.params)
+        if (isCallbackPosition({ node })) return
+        check({ params: node.params })
       },
       FunctionExpression(node) {
-        if (isFrameworkCallback(node)) return
-        check(node.params)
+        if (isCallbackPosition({ node })) return
+        check({ params: node.params })
       },
     }
   },

@@ -8,7 +8,7 @@ import { preferTypeOverInterface } from './rules/prefer-type-over-interface.js'
 const plugin = {
   meta: {
     name: 'eslint-plugin-opinionated-ts',
-    version: '0.1.0',
+    version: '0.2.0',
   },
   rules: {
     'strict-args': strictArgs,
