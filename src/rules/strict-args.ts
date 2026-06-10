@@ -29,20 +29,36 @@ function isCallbackPosition(args: { node: TSESTree.Node }) {
   return false
 }
 
-export const strictArgs = createRule({
+type StrictArgsOptions = {
+  allowedNames: string[]
+}
+
+export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName' | 'inlineType' | 'noOptional' | 'noDestructure'>({
   name: 'strict-args',
-  defaultOptions: [],
+  defaultOptions: [{ allowedNames: ['args'] }],
   meta: {
     type: 'suggestion',
     docs: {
       description:
         'Require functions to use a single `args` parameter with an inline type annotation and no optional properties',
     },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          allowedNames: {
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 1,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       singleArg:
         'Functions with parameters must use a single `args` parameter.',
-      argName: 'The parameter must be named `args`.',
+      argName: 'The parameter must be named {{allowed}}.',
       inlineType:
         'The `args` parameter must have an inline object type annotation (not a type reference).',
       noOptional:
@@ -51,7 +67,9 @@ export const strictArgs = createRule({
         'Do not destructure function parameters. Use `args.property` instead.',
     },
   },
-  create(context) {
+  create(context, [options]) {
+    const allowedNames = options.allowedNames
+
     function check(args: { params: TSESTree.Parameter[] }) {
       const params = args.params.filter(
         (param) => !isThisParameter({ param }),
@@ -85,8 +103,12 @@ export const strictArgs = createRule({
         return
       }
 
-      if (param.name !== 'args') {
-        context.report({ node: param, messageId: 'argName' })
+      if (!allowedNames.includes(param.name)) {
+        context.report({
+          node: param,
+          messageId: 'argName',
+          data: { allowed: allowedNames.map((n) => `\`${n}\``).join(' or ') },
+        })
         return
       }
 

@@ -38,6 +38,11 @@ ruleTester.run('strict-args', strictArgs, {
 
     // JSX expression containers are skipped
     { code: 'const x = <input onChange={(e) => e.target.value} />', languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } } },
+    // allowedNames option: React components may use `props`
+    {
+      code: 'function Button(props: { label: string }) { return props.label }',
+      options: [{ allowedNames: ['args', 'props'] }],
+    },
   ],
   invalid: [
     // Multiple params

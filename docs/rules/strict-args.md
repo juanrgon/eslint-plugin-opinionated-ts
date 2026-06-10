@@ -42,3 +42,13 @@ Functions in **callback position** are exempt, because their signatures are dict
 The object-property exemption is intentionally broad — handler maps and returned visitor objects make a tighter check too noisy.
 
 TypeScript `this` parameters are ignored.
+
+## Options
+
+```jsonc
+{
+  "opinionated-ts/strict-args": ["error", { "allowedNames": ["args", "props"] }]
+}
+```
+
+- `allowedNames` (default `["args"]`) — accepted parameter names. Useful for codebases where React components take `props` instead of `args`.
