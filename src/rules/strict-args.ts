@@ -30,21 +30,20 @@ function isCallbackPosition(args: { node: TSESTree.Node }) {
 }
 
 type StrictArgsOptions = {
-  allowedNames: string[]
+  // When omitted, any parameter name is accepted; providing a list opts in
+  // to name enforcement.
+  allowedNames?: string[]
   optionalAllowedFor: string[]
-  enforceName: boolean
 }
 
 export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName' | 'inlineType' | 'noOptional' | 'noDestructure'>({
   name: 'strict-args',
-  defaultOptions: [
-    { allowedNames: ['args'], optionalAllowedFor: [], enforceName: true },
-  ],
+  defaultOptions: [{ optionalAllowedFor: [] }],
   meta: {
     type: 'suggestion',
     docs: {
       description:
-        'Require functions to use a single `args` parameter with an inline type annotation and no optional properties',
+        'Require functions to use a single object parameter with an inline type annotation and no optional properties',
     },
     schema: [
       {
@@ -59,19 +58,16 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
             type: 'array',
             items: { type: 'string' },
           },
-          enforceName: {
-            type: 'boolean',
-          },
         },
         additionalProperties: false,
       },
     ],
     messages: {
       singleArg:
-        'Functions with parameters must use a single `args` parameter.',
+        'Functions with parameters must use a single object parameter.',
       argName: 'The parameter must be named {{allowed}}.',
       inlineType:
-        'The `args` parameter must have an inline object type annotation (not a type reference).',
+        'The parameter must have an inline object type annotation (not a type reference).',
       noOptional:
         'Properties in the `{{name}}` type must not be optional. Make all properties required.',
       noDestructure:
@@ -115,7 +111,7 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
         return
       }
 
-      if (options.enforceName && !allowedNames.includes(param.name)) {
+      if (allowedNames && !allowedNames.includes(param.name)) {
         context.report({
           node: param,
           messageId: 'argName',

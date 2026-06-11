@@ -48,15 +48,9 @@ ruleTester.run('strict-args', strictArgs, {
       code: 'function Badge(props: { label: string; className?: string }) { return props.label }',
       options: [{ allowedNames: ['args', 'props'], optionalAllowedFor: ['props'] }],
     },
-    // enforceName: false — any parameter name is accepted
-    {
-      code: 'const getSession = (ctx: { req: string; res: string }) => ctx.req',
-      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
-    },
-    {
-      code: 'function process(input: { data: string }) { return input.data }',
-      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
-    },
+    // No allowedNames — any parameter name is accepted by default
+    'const getSession = (ctx: { req: string; res: string }) => ctx.req',
+    'function process(input: { data: string }) { return input.data }',
   ],
   invalid: [
     // optionalAllowedFor does not exempt `args`
@@ -70,9 +64,10 @@ ruleTester.run('strict-args', strictArgs, {
       code: 'function foo(a: string, b: number) { return a }',
       errors: [{ messageId: 'singleArg' }],
     },
-    // Wrong param name
+    // Wrong param name — only enforced when allowedNames is provided
     {
       code: 'function foo(opts: { name: string }) { return opts.name }',
+      options: [{ allowedNames: ['args'], optionalAllowedFor: [] }],
       errors: [{ messageId: 'argName' }],
     },
     // Type reference instead of inline
@@ -110,21 +105,14 @@ ruleTester.run('strict-args', strictArgs, {
       code: 'function foo(this: Context, a: string, b: number) { return a }',
       errors: [{ messageId: 'singleArg' }],
     },
-    // enforceName: false still enforces the shape checks
+    // Shape checks still apply to params with arbitrary names
     {
       code: 'type Ctx = { req: string }; function foo(ctx: Ctx) { return ctx.req }',
-      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
       errors: [{ messageId: 'inlineType' }],
     },
     {
       code: 'function foo(ctx: { req: string; res?: string }) { return ctx.req }',
-      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
       errors: [{ messageId: 'noOptional' }],
-    },
-    {
-      code: 'function foo(a: string, b: number) { return a }',
-      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
-      errors: [{ messageId: 'singleArg' }],
     },
   ],
 })
