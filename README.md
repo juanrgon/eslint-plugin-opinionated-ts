@@ -56,7 +56,7 @@ export default [
 | [`no-enum`](docs/rules/no-enum.md) | No enums. Use `as const` objects with derived types instead. |
 | [`no-type-assertion`](docs/rules/no-type-assertion.md) | No `as` or angle-bracket type assertions. Use `satisfies` instead. `as const` is still allowed. |
 | [`prefer-type-over-interface`](docs/rules/prefer-type-over-interface.md) | No `interface` declarations. Use `type` aliases. `declare global`/`declare module` blocks and `.d.ts` files are exempt. Has autofix (`extends` becomes an intersection). |
-| `unicorn/filename-case` | All files must use kebab-case. Provided via `eslint-plugin-unicorn` in the recommended config. |
+| [`kebab-case-filename`](docs/rules/kebab-case-filename.md) | All files must use kebab-case. Next.js dynamic routes (`[projectId].tsx`) and underscore-prefixed framework files (`_app.tsx`) are exempt. |
 
 ## Dogfooding
 
