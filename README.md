@@ -51,8 +51,8 @@ export default [
 
 | Rule | What it enforces |
 | --- | --- |
-| [`strict-args`](docs/rules/strict-args.md) | Functions take a single `args` parameter with an inline object type. No multiple params, no destructuring, no optional properties, no type references. Callback-position functions are exempt. |
-| [`no-explicit-return-type`](docs/rules/no-explicit-return-type.md) | No return type annotations. Let TypeScript infer them. Type predicates (`x is Foo`), overload signatures, and directly recursive functions are exempt. Has autofix. |
+| [`strict-args`](docs/rules/strict-args.md) | Functions take a single `args` parameter with an inline object type. No multiple params, no destructuring, no optional properties (configurable per name via `optionalAllowedFor`), no type references. Callback-position functions are exempt. |
+| [`no-explicit-return-type`](docs/rules/no-explicit-return-type.md) | No return type annotations. Let TypeScript infer them. Type predicates (`x is Foo`), overload signatures, and directly recursive functions are exempt; `allowExported` permits annotations on exported functions. Has autofix. |
 | [`no-enum`](docs/rules/no-enum.md) | No enums. Use `as const` objects with derived types instead. |
 | [`no-type-assertion`](docs/rules/no-type-assertion.md) | No `as` or angle-bracket type assertions. Use `satisfies` instead. `as const` is still allowed. |
 | [`prefer-type-over-interface`](docs/rules/prefer-type-over-interface.md) | No `interface` declarations. Use `type` aliases. `declare global`/`declare module` blocks and `.d.ts` files are exempt. Has autofix (`extends` becomes an intersection). |

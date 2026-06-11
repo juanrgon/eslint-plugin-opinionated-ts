@@ -43,8 +43,19 @@ ruleTester.run('strict-args', strictArgs, {
       code: 'function Button(props: { label: string }) { return props.label }',
       options: [{ allowedNames: ['args', 'props'] }],
     },
+    // optionalAllowedFor: optional props are correct modeling for components
+    {
+      code: 'function Badge(props: { label: string; className?: string }) { return props.label }',
+      options: [{ allowedNames: ['args', 'props'], optionalAllowedFor: ['props'] }],
+    },
   ],
   invalid: [
+    // optionalAllowedFor does not exempt `args`
+    {
+      code: 'function createUser(args: { name: string; isAdmin?: boolean }) { return args.name }',
+      options: [{ allowedNames: ['args', 'props'], optionalAllowedFor: ['props'] }],
+      errors: [{ messageId: 'noOptional' }],
+    },
     // Multiple params
     {
       code: 'function foo(a: string, b: number) { return a }',

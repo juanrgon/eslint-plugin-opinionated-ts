@@ -52,3 +52,14 @@ TypeScript `this` parameters are ignored.
 ```
 
 - `allowedNames` (default `["args"]`) — accepted parameter names. Useful for codebases where React components take `props` instead of `args`.
+- `optionalAllowedFor` (default `[]`) — parameter names whose properties may be optional. Optionality is correct modeling for React props (`className?: string`), but a hidden decision for function args.
+
+```typescript
+// with { allowedNames: ["args", "props"], optionalAllowedFor: ["props"] }
+
+// ✅ allowed — optional prop is correct modeling
+function Badge(props: { label: string; className?: string }) {}
+
+// ❌ still flagged — optional on args hides a caller decision
+function createUser(args: { name: string; isAdmin?: boolean }) {}
+```

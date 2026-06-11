@@ -24,8 +24,28 @@ ruleTester.run('no-explicit-return-type', noExplicitReturnType, {
     // Directly recursive functions cannot infer their own return type (TS7023)
     'function walk(args: { value: unknown }): string { return Array.isArray(args.value) ? args.value.map((v) => walk({ value: v })).join() : "" }',
     'const walk = (args: { value: unknown }): string => Array.isArray(args.value) ? args.value.map((v) => walk({ value: v })).join() : ""',
+    // allowExported: exported functions may declare their contract
+    {
+      code: 'export function api(args: { id: string }): Promise<string> { return fetchThing(args.id) }',
+      options: [{ allowExported: true }],
+    },
+    {
+      code: 'export const resolver = (args: { id: string }): Resolver => makeResolver(args.id)',
+      options: [{ allowExported: true }],
+    },
+    {
+      code: 'export default function handler(): void {}',
+      options: [{ allowExported: true }],
+    },
   ],
   invalid: [
+    // allowExported does not exempt internal functions
+    {
+      code: 'function helper(): number { return 1 }',
+      options: [{ allowExported: true }],
+      output: 'function helper() { return 1 }',
+      errors: [{ messageId: 'noReturnType' }],
+    },
     {
       code: 'function add(args: { a: number; b: number }): number { return args.a + args.b }',
       output: 'function add(args: { a: number; b: number }) { return args.a + args.b }',

@@ -31,11 +31,12 @@ function isCallbackPosition(args: { node: TSESTree.Node }) {
 
 type StrictArgsOptions = {
   allowedNames: string[]
+  optionalAllowedFor: string[]
 }
 
 export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName' | 'inlineType' | 'noOptional' | 'noDestructure'>({
   name: 'strict-args',
-  defaultOptions: [{ allowedNames: ['args'] }],
+  defaultOptions: [{ allowedNames: ['args'], optionalAllowedFor: [] }],
   meta: {
     type: 'suggestion',
     docs: {
@@ -51,6 +52,10 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
             items: { type: 'string' },
             minItems: 1,
           },
+          optionalAllowedFor: {
+            type: 'array',
+            items: { type: 'string' },
+          },
         },
         additionalProperties: false,
       },
@@ -62,13 +67,14 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
       inlineType:
         'The `args` parameter must have an inline object type annotation (not a type reference).',
       noOptional:
-        'Properties in the `args` type must not be optional. Make all properties required.',
+        'Properties in the `{{name}}` type must not be optional. Make all properties required.',
       noDestructure:
         'Do not destructure function parameters. Use `args.property` instead.',
     },
   },
   create(context, [options]) {
     const allowedNames = options.allowedNames
+    const optionalAllowedFor = options.optionalAllowedFor
 
     function check(args: { params: TSESTree.Parameter[] }) {
       const params = args.params.filter(
@@ -123,12 +129,20 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
         return
       }
 
+      // Optionality is correct modeling for React props (`className?`), but a
+      // hidden decision for function args — configurable per parameter name.
+      if (optionalAllowedFor.includes(param.name)) return
+
       for (const member of typeNode.members) {
         if (
           member.type === AST_NODE_TYPES.TSPropertySignature &&
           member.optional
         ) {
-          context.report({ node: member, messageId: 'noOptional' })
+          context.report({
+            node: member,
+            messageId: 'noOptional',
+            data: { name: param.name },
+          })
         }
       }
     }

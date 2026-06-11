@@ -52,3 +52,23 @@ function mode(args: { value: unknown }) {
   return args.value === "local" ? ("local" as const) : ("apiKey" as const)
 }
 ```
+
+## Options
+
+```jsonc
+{
+  "opinionated-ts/no-explicit-return-type": ["error", { "allowExported": true }]
+}
+```
+
+- `allowExported` (default `false`) — permit annotations on exported functions. Inference rules inside the module, but an exported function's return type is a contract, and at real boundaries (react-hook-form resolvers, RPC router outputs, recursive utilities) the annotation is often load-bearing.
+
+```typescript
+// with { allowExported: true }
+
+// ✅ allowed — boundary contract
+export function zodResolver<T extends z.Schema>(schema: T): Resolver<z.infer<T>> {}
+
+// ❌ still flagged — internal function, inference is right
+function totalWordCount(args: { chapters: Chapter[] }): number {}
+```
