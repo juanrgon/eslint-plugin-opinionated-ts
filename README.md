@@ -16,6 +16,8 @@ npm install --save-dev github:juanrgon/eslint-plugin-opinionated-ts#release
 
 Requires `@typescript-eslint/parser` to be configured, since the rules operate on TypeScript AST nodes. If you're using `typescript-eslint`, you likely already have this.
 
+The `recommended-type-checked` config also requires TypeScript parser services. Configure the parser with `parserOptions.projectService: true` (or an equivalent typed-linting setup) before enabling it.
+
 ## Usage
 
 Add the recommended config to your `eslint.config.js`:
@@ -26,6 +28,24 @@ import opinionatedTs from 'eslint-plugin-opinionated-ts'
 export default [
   opinionatedTs.configs.recommended,
   // ... your other configs
+]
+```
+
+For rules that detect inferred unsafe types, use the type-checked config with `@typescript-eslint/parser`:
+
+```js
+import tsParser from '@typescript-eslint/parser'
+import opinionatedTs from 'eslint-plugin-opinionated-ts'
+
+export default [
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: { projectService: true },
+    },
+    ...opinionatedTs.configs['recommended-type-checked'],
+  },
 ]
 ```
 
@@ -55,6 +75,8 @@ export default [
 | [`no-explicit-return-type`](docs/rules/no-explicit-return-type.md) | No return type annotations. Let TypeScript infer them. Type predicates (`x is Foo`), overload signatures, and directly recursive functions are exempt; `allowExported` permits annotations on exported functions. Has autofix. |
 | [`no-enum`](docs/rules/no-enum.md) | No enums. Use `as const` objects with derived types instead. |
 | [`no-type-assertion`](docs/rules/no-type-assertion.md) | No `as` or angle-bracket type assertions. Use `satisfies` instead. `as const` is still allowed. |
+| [`no-explicit-any`](docs/rules/no-explicit-any.md) | No explicit `any` annotations. Re-exports the canonical `@typescript-eslint` rule and prevents replacing an assertion with an `any` bridge. |
+| [`no-unsafe-assignment`](docs/rules/no-unsafe-assignment.md) | No assigning inferred or explicit `any` values into typed variables/properties. Re-exports the canonical type-aware `@typescript-eslint` rule. |
 | [`prefer-type-over-interface`](docs/rules/prefer-type-over-interface.md) | No `interface` declarations. Use `type` aliases. `declare global`/`declare module` blocks and `.d.ts` files are exempt. Has autofix (`extends` becomes an intersection). |
 | [`kebab-case-filename`](docs/rules/kebab-case-filename.md) | All files must use kebab-case. Next.js dynamic routes (`[projectId].tsx`) and underscore-prefixed framework files (`_app.tsx`) are exempt. |
 
