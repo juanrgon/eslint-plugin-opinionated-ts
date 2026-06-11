@@ -53,6 +53,7 @@ TypeScript `this` parameters are ignored.
 
 - `allowedNames` (default `["args"]`) — accepted parameter names. Useful for codebases where React components take `props` instead of `args`.
 - `optionalAllowedFor` (default `[]`) — parameter names whose properties may be optional. Optionality is correct modeling for React props (`className?: string`), but a hidden decision for function args.
+- `enforceName` (default `true`) — when `false`, any parameter name is accepted (`ctx`, `input`, …) and `allowedNames` is ignored. The shape checks (single parameter, inline type, no destructuring, no optional properties) still apply; `optionalAllowedFor` still matches by name.
 
 ```typescript
 // with { allowedNames: ["args", "props"], optionalAllowedFor: ["props"] }

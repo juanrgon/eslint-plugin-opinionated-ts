@@ -32,11 +32,14 @@ function isCallbackPosition(args: { node: TSESTree.Node }) {
 type StrictArgsOptions = {
   allowedNames: string[]
   optionalAllowedFor: string[]
+  enforceName: boolean
 }
 
 export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName' | 'inlineType' | 'noOptional' | 'noDestructure'>({
   name: 'strict-args',
-  defaultOptions: [{ allowedNames: ['args'], optionalAllowedFor: [] }],
+  defaultOptions: [
+    { allowedNames: ['args'], optionalAllowedFor: [], enforceName: true },
+  ],
   meta: {
     type: 'suggestion',
     docs: {
@@ -55,6 +58,9 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
           optionalAllowedFor: {
             type: 'array',
             items: { type: 'string' },
+          },
+          enforceName: {
+            type: 'boolean',
           },
         },
         additionalProperties: false,
@@ -109,7 +115,7 @@ export const strictArgs = createRule<[StrictArgsOptions], 'singleArg' | 'argName
         return
       }
 
-      if (!allowedNames.includes(param.name)) {
+      if (options.enforceName && !allowedNames.includes(param.name)) {
         context.report({
           node: param,
           messageId: 'argName',

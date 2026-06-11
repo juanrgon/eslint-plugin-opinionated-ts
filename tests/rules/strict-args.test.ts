@@ -48,6 +48,15 @@ ruleTester.run('strict-args', strictArgs, {
       code: 'function Badge(props: { label: string; className?: string }) { return props.label }',
       options: [{ allowedNames: ['args', 'props'], optionalAllowedFor: ['props'] }],
     },
+    // enforceName: false — any parameter name is accepted
+    {
+      code: 'const getSession = (ctx: { req: string; res: string }) => ctx.req',
+      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
+    },
+    {
+      code: 'function process(input: { data: string }) { return input.data }',
+      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
+    },
   ],
   invalid: [
     // optionalAllowedFor does not exempt `args`
@@ -99,6 +108,22 @@ ruleTester.run('strict-args', strictArgs, {
     // `this` param + multiple real params should still error
     {
       code: 'function foo(this: Context, a: string, b: number) { return a }',
+      errors: [{ messageId: 'singleArg' }],
+    },
+    // enforceName: false still enforces the shape checks
+    {
+      code: 'type Ctx = { req: string }; function foo(ctx: Ctx) { return ctx.req }',
+      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
+      errors: [{ messageId: 'inlineType' }],
+    },
+    {
+      code: 'function foo(ctx: { req: string; res?: string }) { return ctx.req }',
+      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
+      errors: [{ messageId: 'noOptional' }],
+    },
+    {
+      code: 'function foo(a: string, b: number) { return a }',
+      options: [{ allowedNames: ['args'], optionalAllowedFor: [], enforceName: false }],
       errors: [{ messageId: 'singleArg' }],
     },
   ],
